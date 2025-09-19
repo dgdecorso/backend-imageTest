@@ -4,6 +4,7 @@ import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.UserMapper;
 import com.example.demo.domain.user.dto.UserRegisterDTO;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 import java.util.UUID;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +35,22 @@ public class UserController {
     this.userMapper = userMapper;
   }
 
+  @GetMapping("/profile")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<UserDTO> getMyProfile(Authentication authentication) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    return new ResponseEntity<>(userMapper.toDTO(userDetails.user()), HttpStatus.OK);
+  }
+
   @GetMapping("/{id}")
+  @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and #id == authentication.principal.user.id)")
   public ResponseEntity<UserDTO> retrieveById(@PathVariable UUID id) {
     User user = userService.findById(id);
     return new ResponseEntity<>(userMapper.toDTO(user), HttpStatus.OK);
   }
 
   @GetMapping({"", "/"})
+  @PreAuthorize("hasAuthority('ADMIN')")
   public ResponseEntity<List<UserDTO>> retrieveAll() {
     List<User> users = userService.findAll();
     return new ResponseEntity<>(userMapper.toDTOs(users), HttpStatus.OK);
@@ -57,14 +67,14 @@ public class UserController {
     return new ResponseEntity<>(userMapper.toDTO(user), HttpStatus.CREATED);
   }
   @PutMapping("/{id}")
-  @PreAuthorize("hasAuthority('USER_MODIFY') && @userPermissionEvaluator.exampleEvaluator(authentication.principal.user,#id)")
+  @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and #id == authentication.principal.user.id)")
   public ResponseEntity<UserDTO> updateById(@PathVariable UUID id, @Valid @RequestBody UserDTO userDTO) {
     User user = userService.updateById(id, userMapper.fromDTO(userDTO));
     return new ResponseEntity<>(userMapper.toDTO(user), HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAuthority('USER_DELETE')")
+  @PreAuthorize("hasAuthority('ADMIN') or (isAuthenticated() and #id == authentication.principal.user.id)")
   public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
     userService.deleteById(id);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);

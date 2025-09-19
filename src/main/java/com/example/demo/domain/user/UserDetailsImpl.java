@@ -9,12 +9,19 @@ public record UserDetailsImpl(User user) implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return user.getRoles()
-               .stream()
-               .flatMap(r -> r.getAuthorities()
-                              .stream())
-               .map(a -> new SimpleGrantedAuthority(a.getName()))
-               .toList();
+    var roleAuthorities = user.getRoles()
+        .stream()
+        .map(r -> new SimpleGrantedAuthority(r.getName()))
+        .toList();
+
+    var authorities = user.getRoles()
+        .stream()
+        .flatMap(r -> r.getAuthorities().stream())
+        .map(a -> new SimpleGrantedAuthority(a.getName()))
+        .toList();
+
+    return java.util.stream.Stream.concat(roleAuthorities.stream(), authorities.stream())
+        .toList();
   }
 
   @Override
