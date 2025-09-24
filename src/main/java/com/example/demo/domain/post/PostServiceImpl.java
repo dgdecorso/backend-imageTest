@@ -38,8 +38,7 @@ public class PostServiceImpl extends AbstractServiceImpl<Post> implements PostSe
         Post post = findById(postId);
         
         // Check if user is owner or admin
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && 
-            !hasAdminRole(currentUser)) {
+        if (!post.isOwner(currentUser) && !hasAdminRole(currentUser)) {
             throw new AccessDeniedException("You can only edit your own posts");
         }
         
@@ -55,8 +54,7 @@ public class PostServiceImpl extends AbstractServiceImpl<Post> implements PostSe
         Post post = findById(postId);
         
         // Check if user is owner or admin
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && 
-            !hasAdminRole(currentUser)) {
+        if (!post.isOwner(currentUser) && !hasAdminRole(currentUser)) {
             throw new AccessDeniedException("You can only delete your own posts");
         }
         
@@ -65,16 +63,17 @@ public class PostServiceImpl extends AbstractServiceImpl<Post> implements PostSe
     
     @Override
     @Transactional
-    public Post toggleLike(UUID postId, User user) {
+    public Post likeOrUnlike(UUID postId, User user) {
         Post post = findById(postId);
-        post.toggleLike(user);
+        
+        // Check if user is trying to like their own post
+        if (post.isOwner(user)) {
+            throw new IllegalArgumentException("You cannot like your own post");
+        }
+        
+        // Like or unlike (if already liked, it will remove; if not, it will add)
+        post.likeOrUnlike(user);
         return postRepository.save(post);
-    }
-    
-    @Override
-    public boolean isOwner(UUID postId, UUID userId) {
-        Post post = findById(postId);
-        return post.getAuthor().getId().equals(userId);
     }
     
     @Override

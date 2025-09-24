@@ -11,7 +11,6 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "posts")
@@ -49,15 +48,7 @@ public class Post extends AbstractEntity {
         createdAt = LocalDateTime.now();
     }
 
-    public Post(UUID id, User author, String description, String imageUrl) {
-        super(id);
-        this.author = author;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.likedBy = new HashSet<>();
-    }
-
-    public void toggleLike(User user) {
+    public void likeOrUnlike(User user) {
         if (likedBy.contains(user)) {
             likedBy.remove(user);
         } else {
@@ -71,6 +62,10 @@ public class Post extends AbstractEntity {
 
     public boolean isLikedByUser(User user) {
         return likedBy.contains(user);
+    }
+
+    public boolean isOwner(User user) {
+        return author != null && author.getId().equals(user.getId());
     }
 }
 

@@ -15,9 +15,7 @@ public interface PostService extends AbstractService<Post> {
     
     void deletePost(UUID postId, User currentUser);
     
-    Post toggleLike(UUID postId, User user);
-    
-    boolean isOwner(UUID postId, UUID userId);
+    Post likeOrUnlike(UUID postId, User user);
     
     List<Post> findAllOrderedByDate();
 }

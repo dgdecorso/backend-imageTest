@@ -2,6 +2,7 @@ package com.example.demo.domain.post;
 
 import com.example.demo.domain.post.dto.PostDTO;
 import com.example.demo.domain.post.dto.PostMapper;
+import com.example.demo.domain.user.User;
 import com.example.demo.domain.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Validated
@@ -80,9 +83,23 @@ public class PostController {
     
     @PostMapping("/{id}/like")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PostDTO> toggleLike(@PathVariable UUID id, Authentication auth) {
+    public ResponseEntity<Map<String, Object>> likeOrUnlike(@PathVariable UUID id, Authentication auth) {
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        Post post = postService.toggleLike(id, userDetails.user());
-        return ResponseEntity.ok(postMapper.toDTO(post));
+        User user = userDetails.user();
+        
+        // Check if already liked before changing
+        Post postBefore = postService.findById(id);
+        boolean wasLiked = postBefore.isLikedByUser(user);
+        
+        // the like
+        Post post = postService.likeOrUnlike(id, user);
+        
+        // Create response with action details
+        Map<String, Object> response = new HashMap<>();
+        response.put("post", postMapper.toDTO(post));
+        response.put("action", wasLiked ? "unliked" : "liked");
+        response.put("message", wasLiked ? "Post unliked successfully" : "Post liked successfully");
+        
+        return ResponseEntity.ok(response);
     }
 }

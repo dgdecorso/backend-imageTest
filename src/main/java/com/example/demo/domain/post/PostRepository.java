@@ -8,8 +8,6 @@ import java.util.UUID;
 @Repository
 public interface PostRepository extends AbstractRepository<Post> {
     
-    List<Post> findByAuthorId(UUID authorId);
-    
     List<Post> findByAuthorIdOrderByCreatedAtDesc(UUID authorId);
     
     List<Post> findAllByOrderByCreatedAtDesc();
