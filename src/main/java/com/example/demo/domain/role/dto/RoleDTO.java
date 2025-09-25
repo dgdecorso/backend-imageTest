@@ -11,7 +11,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.Set;
-import java.util.UUID;
 
 @NoArgsConstructor
 @Setter
@@ -25,11 +24,5 @@ public class RoleDTO extends AbstractDTO {
 
   @Valid
   private Set<AuthorityDTO> authorities;
-
-  public RoleDTO(UUID id, String name, Set<AuthorityDTO> authorities) {
-    super(id);
-    this.name = name;
-    this.authorities = authorities;
-  }
 
 }

@@ -51,4 +51,18 @@ public class User extends AbstractEntity {
     this.roles = roles;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true; // same object?
+    if (!(o instanceof User)) return false; // if it's no a user then give false
+    User user = (User) o; // converts objects to user types to compare
+    return getId() != null && getId().equals(user.getId());  // compares user IDs
+  }
+
+  // to find the likedBy id faster to store/ find users in sets
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
+
 }

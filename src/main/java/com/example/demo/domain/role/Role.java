@@ -33,10 +33,4 @@ public class Role extends AbstractEntity {
              inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
   private Set<Authority> authorities = new HashSet<>();
 
-  public Role(UUID id, String name, Set<Authority> authorities) {
-    super(id);
-    this.name = name;
-    this.authorities = authorities;
-  }
-
 }
